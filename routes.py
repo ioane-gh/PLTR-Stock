@@ -24,6 +24,8 @@ from flask import Flask, jsonify
 import sqlite3
 from datetime import datetime
 
+from werkzeug.utils import get_content_type
+
 # Initialize Flask application
 app = Flask(__name__)
 
@@ -258,6 +260,49 @@ def get_stocks_by_date(date):
             'message': str(e)
         }), 500
 
+
+@app.route('/api/stocks/latest', methods=['GET'])
+def get_latest_date():
+    conn = get_db_connection()
+    query = 'SELECT * FROM stocks WHERE date = (SELECT max(date) FROM stocks)'
+    last_date_data = conn.execute(query).fetchone()
+    conn.close()
+
+    try:
+        if last_date_data:
+            stock_record = {
+                    'date': last_date_data['date'],                    # Trading date
+                    'open': float(last_date_data['open']),             # Opening price
+                    'high': float(last_date_data['high']),             # Highest price of the day
+                    'low': float(last_date_data['low']),               # Lowest price of the day
+                    'close': float(last_date_data['close']),           # Closing price
+                    'adj_close': float(last_date_data['adj_close']),   # Adjusted closing price
+                    'volume': int(last_date_data['volume'])            # Number of shares traded
+                }
+            return jsonify({
+                'success':True,
+                'data': stock_record,
+                'message': 'Successfully retrieved latest stock data'
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Not found',
+                'message': 'No stock data found'
+            }), 404
+    except sqlite3.Error as e:
+        return jsonify({
+            'success': False,
+            'error': 'Database Error',
+            'message': str(e)
+        }), 500
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': 'Internal Server Error',
+            'message': str(e)
+        }), 500
+        
 
 # Application entry point
 if __name__ == '__main__':

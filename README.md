@@ -143,7 +143,44 @@ curl "http://localhost:5000/api/stocks"
 curl "http://localhost:5000/api/stocks/date/2021-06-15"
 ```
 
-### 3. Health Check
+### 3. Get Latest Stock Data
+
+**Endpoint:** `GET /api/stocks/latest`
+
+**Description:** Retrieves the most recent stock data (latest trading date) from the database.
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "data": {
+    "date": "2025-09-09",
+    "open": 25.5,
+    "high": 26.2,
+    "low": 25.1,
+    "close": 25.8,
+    "adj_close": 25.8,
+    "volume": 45000000
+  },
+  "message": "Successfully retrieved latest stock data"
+}
+```
+
+**Response (Not Found):**
+```json
+{
+  "success": false,
+  "error": "Not found",
+  "message": "No stock data found"
+}
+```
+
+**Example Usage:**
+```bash
+curl "http://localhost:5000/api/stocks/latest"
+```
+
+### 4. Health Check
 
 **Endpoint:** `GET /api/health`
 
@@ -236,6 +273,9 @@ curl "http://localhost:5000/api/stocks"
 # Test specific date endpoint
 curl "http://localhost:5000/api/stocks/date/2021-06-15"
 
+# Test latest stock data endpoint
+curl "http://localhost:5000/api/stocks/latest"
+
 # Test invalid date
 curl "http://localhost:5000/api/stocks/date/2025-01-01"
 ```
@@ -257,6 +297,14 @@ print(f"Retrieved {data['count']} stock records")
 # Test specific date
 response = requests.get("http://localhost:5000/api/stocks/date/2021-06-15")
 print(response.json())
+
+# Test latest stock data
+response = requests.get("http://localhost:5000/api/stocks/latest")
+data = response.json()
+if data['success']:
+    print(f"Latest stock data: {data['data']['date']} - Close: ${data['data']['close']}")
+else:
+    print(f"Error: {data['message']}")
 ```
 
 ## 📈 Data Analysis Examples
@@ -365,6 +413,11 @@ For support, questions, or contributions, please:
 
 ## 🔄 Version History
 
+- **v1.1.0** - Added latest stock data endpoint
+  - GET /api/stocks/latest - Retrieve most recent stock data
+  - Fixed SQL query typo in latest endpoint
+  - Updated documentation and testing examples
+
 - **v1.0.0** - Initial release with basic CRUD operations
   - GET /api/stocks - Retrieve all stock data
   - GET /api/stocks/date/<date> - Retrieve data by date
@@ -381,3 +434,4 @@ The stock data is sourced from historical PLTR trading data covering the period 
 ---
 
 **Note:** This API is for educational and development purposes. For production financial applications, ensure compliance with relevant financial data regulations and consider using official financial data providers.
+
